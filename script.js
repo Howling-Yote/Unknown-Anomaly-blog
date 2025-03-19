@@ -649,4 +649,47 @@ document.addEventListener('DOMContentLoaded', () => {
             sparkle.remove();
         });
     }
+    // Music player functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const audio = document.getElementById('backgroundMusic');
+        const toggleButton = document.getElementById('toggleMusic');
+
+        // Try to play music automatically
+        const playPromise = audio.play();
+
+        // Modern browsers require user interaction before playing audio
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                // Auto-play was prevented
+                console.log("Auto-play was prevented. Please click the play button.");
+                toggleButton.textContent = "▶ PLAY";
+            });
+        }
+
+        // Toggle music play/pause
+        toggleButton.addEventListener('click', function () {
+            if (audio.paused) {
+                audio.play();
+                toggleButton.textContent = "▐▐ PAUSE";
+            } else {
+                audio.pause();
+                toggleButton.textContent = "▶ PLAY";
+            }
+        });
+
+        // Old-school alert to notify user about music
+        setTimeout(function () {
+            if (audio.paused) {
+                alert("⚠️ Click PLAY! ⚠️");
+            }
+        }, 3000);
+    });
+    document.addEventListener('click', function () {
+        const audio = document.getElementById('backgroundMusic');
+        if (audio.paused) {
+            audio.play().catch(error => {
+                console.error("Audio playback failed:", error);
+            });
+        }
+    });
 });
