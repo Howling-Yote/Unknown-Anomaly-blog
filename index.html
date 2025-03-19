@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strange Anomaly</title>
+    <title>Unknown Anomaly</title>
     <link rel="stylesheet" href="/styles.css">
     <style>
         /* Additional styles for construction and guestbook sections */
@@ -37,13 +37,24 @@
     </style>
 </head>
 <body>
+    <!-- Add this right after the opening <body> tag -->
+    <audio id="backgroundMusic" loop>
+        <source src="/assets/audio/intro.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 
     <div class="container">
         <div class="header">
             <h1>Header</h1>
             <div class="welcome-banner">
-                <span style="font-size: 24px;">♦ You've arrived ' ♦</span>
+                <span style="font-size: 24px;">♦ You've arrived! We're so glad to have you here. ♦</span>
             </div>
+        </div>
+
+        <div class="music-controls">
+            <span class="music-icon">🎵</span>
+            <span id="songTitle">Now Playing: Stardew Valley OST - Mines (Icicles).mp3</span>
+            <button id="toggleMusic" class="music-button">▐▐ PAUSE</button>
         </div>
 
         <marquee class="marquee">Welcome to my lil corner of de interwebz >:3 Best viewed in Netscape Navigator!</marquee>
