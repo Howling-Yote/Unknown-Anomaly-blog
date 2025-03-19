@@ -1,4 +1,4 @@
-﻿body {
+﻿ body {
     background-image: url('https://gifdb.com/images/thumbnail/pixelated-star-background-e09dbw6zvuyp420b.gif');
     font-family: "Comic Sans MS", cursive, sans-serif;
     margin: 0;
@@ -452,5 +452,48 @@ body {
     100% {
         transform: scale(0.2);
         opacity: 0;
+    }
+}
+.music-controls {
+    background-color: #000040;
+    padding: 10px;
+    margin: 10px 0;
+    border: 2px solid #ff00ff;
+    text-align: center;
+    color: #00ff00;
+    font-family: "Courier New", monospace;
+    animation: blink 2s infinite;
+}
+
+.music-icon {
+    font-size: 20px;
+    vertical-align: middle;
+    animation: spin 4s linear infinite;
+    display: inline-block;
+}
+
+.music-button {
+    background-color: #ff00ff;
+    color: #fff;
+    border: 2px solid #00ff00;
+    padding: 3px 10px;
+    cursor: url('/assets/cursors/w98hand.cur'), pointer;
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+    .music-button:hover {
+        background-color: #00ff00;
+        color: #000;
+    }
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
     }
 }
