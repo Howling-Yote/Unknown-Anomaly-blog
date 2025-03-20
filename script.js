@@ -1,4 +1,4 @@
-﻿async function updateVisitorCount() {
+async function updateVisitorCount() {
     try {
         const response = await fetch('/api/visitor-count');
         if (!response.ok) {
@@ -36,67 +36,106 @@ document.addEventListener('visibilitychange', () => {
 
 async function submitGuestbook(event) {
     event.preventDefault();
-
-    const formData = {
-        name: document.getElementById('guestName').value,
-        email: document.getElementById('guestEmail').value,
-        homepage: document.getElementById('guestHomepage').value,
-        message: document.getElementById('guestMessage').value
-    };
-
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    // Show submission in progress message
+    form.innerHTML = '<div style="color: #00ff00; text-align: center;">Sending your entry... Please wait!</div>';
+    
     try {
-        const response = await fetch('/api/guestbook', {
+        // Replace with your repo details
+        const username = 'Howling-Yote';
+        const repo = 'Howling-Yote.github.io';
+        const branch = 'main'; // or master
+        
+        const endpoint = `https://api.staticman.net/v3/entry/github/${Howling-Yote}/${Unknown-Anomaly-blog}/${main}/guestbook`;
+        
+        const response = await fetch(endpoint, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
+            body: formData
         });
-
-        const data = await response.json();
-
+        
         if (response.ok) {
-            alert('Thanks for signing my guestbook!');
-            loadGuestbookEntries();
-            event.target.reset();
+            // Success message
+            form.innerHTML = `
+                <div style="color: #00ff00; text-align: center; border: 2px dashed #ff00ff; padding: 10px;">
+                    <h3>✧･ﾟ: *✧･ﾟ:* THANKS! *:･ﾟ✧*:･ﾟ✧</h3>
+                    <p>Your guestbook entry has been submitted!</p>
+                    <p>It will appear after moderation.</p>
+                    <button onclick="resetGuestbookForm()" style="background: #ff00ff; color: white; border: 2px solid #00ff00; margin-top: 10px; cursor: pointer;">
+                        Submit Another Entry
+                    </button>
+                </div>
+            `;
         } else {
-            console.error('Server error:', data);
-            alert(`Error signing guestbook: ${data.error}\n${data.details || ''}`);
+            throw new Error('Submission failed');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error signing guestbook! Please try again later.');
+        form.innerHTML = `
+            <div style="color: #ff0000; text-align: center; border: 2px dashed #ff00ff; padding: 10px;">
+                <h3>Uh oh! Something went wrong!</h3>
+                <p>Please try again later.</p>
+                <button onclick="resetGuestbookForm()" style="background: #ff00ff; color: white; border: 2px solid #00ff00; margin-top: 10px; cursor: pointer;">
+                    Try Again
+                </button>
+            </div>
+        `;
     }
 }
 
-async function loadGuestbookEntries() {
-    try {
-        const response = await fetch('/api/guestbook');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const entries = await response.json();
-
-        const entriesHtml = entries.map(entry => {
-            // Create a new date object from the entry date
-            let displayDate = new Date(entry.date);
-            // Force the year to 1999
-            displayDate.setFullYear(1999);
-
-            return `
-        <div class="guestbook-entry">
-            <p><strong>${entry.name}</strong> ${entry.homepage ? `<a href="${entry.homepage}">[Homepage]</a>` : ''}</p>
-            <p>${entry.message}</p>
-            <small>Posted on: ${displayDate.toLocaleDateString()}</small>
-        </div>
+function resetGuestbookForm() {
+    document.querySelector('.guestbook-form').innerHTML = `
+        <form onsubmit="submitGuestbook(event)">
+            <input type="text" name="fields[name]" placeholder="Your Name" required>
+            <input type="email" name="fields[email]" placeholder="Your Email" required>
+            <input type="url" name="fields[homepage]" placeholder="Your Homepage URL">
+            <textarea name="fields[message]" placeholder="Your Message" rows="4" required></textarea>
+            <button type="submit">Sign Guestbook!</button>
+            <div class="retro-note">
+                <marquee scrollamount="3" direction="left" behavior="alternate">
+                    ✧･ﾟ: Entries will appear after approval :･ﾟ✧
+                </marquee>
+            </div>
+        </form>
     `;
+}
+
+async function loadGuestbookEntries() {
+    try {
+        // Replace with your repo details
+        const username = 'YOUR_GITHUB_USERNAME';
+        const repo = 'YOUR_REPO_NAME';
+        
+        // Fetch the JSON data file that GitHub Pages will generate from your _data folder
+        const response = await fetch(`https://raw.githubusercontent.com/${username}/${repo}/main/_data/guestbook.json`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const entries = await response.json();
+        
+        const entriesHtml = Object.entries(entries).map(([id, entry]) => {
+            // Create a Y2K era date display
+            const date = new Date(entry.date * 1000);
+            date.setFullYear(1999); // Force Y2K era date
+            
+            return `
+            <div class="guestbook-entry">
+                <p><strong>${entry.name}</strong> ${entry.homepage ? `<a href="${entry.homepage}" target="_blank">[Homepage]</a>` : ''}</p>
+                <p>${entry.message}</p>
+                <small>Posted on: ${date.toLocaleDateString()}</small>
+            </div>
+            `;
         }).join('');
-
-        document.getElementById('guestbookEntries').innerHTML = entriesHtml;
+        
+        document.getElementById('guestbookEntries').innerHTML = entriesHtml || '<p style="color: #ffff00;">No entries yet! Be the first to sign the guestbook!</p>';
     } catch (error) {
         console.error('Error loading entries:', error);
-        document.getElementById('guestbookEntries').innerHTML =
-            '<p style="color: #ff0000;">Error loading guestbook entries. Please try again later.</p>';
+        document.getElementById('guestbookEntries').innerHTML = 
+            '<p style="color: #ff0000;">Error loading guestbook entries. Please refresh or try again later.</p>';
     }
 }
 
@@ -105,516 +144,7 @@ function showGuestbook() {
 }
 
 // Load entries when page loads
-document.addEventListener('DOMContentLoaded', loadGuestbookEntries);async function submitGuestbook(event) {
-    event.preventDefault();
-
-    const formData = {
-        name: document.getElementById('guestName').value,
-        email: document.getElementById('guestEmail').value,
-        homepage: document.getElementById('guestHomepage').value,
-        message: document.getElementById('guestMessage').value
-    };
-
-    try {
-        const response = await fetch('/api/guestbook', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            alert('Thanks for signing my guestbook!');
-            loadGuestbookEntries();
-            event.target.reset();
-        } else {
-            console.error('Server error:', data);
-            alert(`Error signing guestbook: ${data.error}\n${data.details || ''}`);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error signing guestbook! Please try again later.');
-    }
-}
-
-async function loadGuestbookEntries() {
-    try {
-        const response = await fetch('/api/guestbook');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const entries = await response.json();
-
-        const entriesHtml = entries.map(entry => `
-            <div class="guestbook-entry">
-                <p><strong>${entry.name}</strong> ${entry.homepage ? `<a href="${entry.homepage}">[Homepage]</a>` : ''}</p>
-                <p>${entry.message}</p>
-                <small>Posted on: ${new Date(entry.date).toLocaleDateString()}</small>
-            </div>
-        `).join('');
-
-        document.getElementById('guestbookEntries').innerHTML = entriesHtml;
-    } catch (error) {
-        console.error('Error loading entries:', error);
-        document.getElementById('guestbookEntries').innerHTML =
-            '<p style="color: #ff0000;">Error loading guestbook entries. Please try again later.</p>';
-    }
-}
-
-function showGuestbook() {
-    document.getElementById('guestbook').scrollIntoView({ behavior: 'smooth' });
-}
-
-// Load entries when page loads
-document.addEventListener('DOMContentLoaded', loadGuestbookEntries);async function submitGuestbook(event) {
-    event.preventDefault();
-
-    const formData = {
-        name: document.getElementById('guestName').value,
-        email: document.getElementById('guestEmail').value,
-        homepage: document.getElementById('guestHomepage').value,
-        message: document.getElementById('guestMessage').value
-    };
-
-    try {
-        const response = await fetch('/api/guestbook', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            alert('Thanks for signing my guestbook!');
-            loadGuestbookEntries();
-            event.target.reset();
-        } else {
-            console.error('Server error:', data);
-            alert(`Error signing guestbook: ${data.error}\n${data.details || ''}`);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error signing guestbook! Please try again later.');
-    }
-}
-
-async function loadGuestbookEntries() {
-    try {
-        const response = await fetch('/api/guestbook');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const entries = await response.json();
-
-        const entriesHtml = entries.map(entry => `
-            <div class="guestbook-entry">
-                <p><strong>${entry.name}</strong> ${entry.homepage ? `<a href="${entry.homepage}">[Homepage]</a>` : ''}</p>
-                <p>${entry.message}</p>
-                <small>Posted on: ${new Date(entry.date).toLocaleDateString()}</small>
-            </div>
-        `).join('');
-
-        document.getElementById('guestbookEntries').innerHTML = entriesHtml;
-    } catch (error) {
-        console.error('Error loading entries:', error);
-        document.getElementById('guestbookEntries').innerHTML =
-            '<p style="color: #ff0000;">Error loading guestbook entries. Please try again later.</p>';
-    }
-}
-
-function showGuestbook() {
-    document.getElementById('guestbook').scrollIntoView({ behavior: 'smooth' });
-}
-
-// Load entries when page loads
-document.addEventListener('DOMContentLoaded', loadGuestbookEntries);async function submitGuestbook(event) {
-    event.preventDefault();
-
-    const formData = {
-        name: document.getElementById('guestName').value,
-        email: document.getElementById('guestEmail').value,
-        homepage: document.getElementById('guestHomepage').value,
-        message: document.getElementById('guestMessage').value
-    };
-
-    try {
-        const response = await fetch('/api/guestbook', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            alert('Thanks for signing my guestbook!');
-            loadGuestbookEntries();
-            event.target.reset();
-        } else {
-            console.error('Server error:', data);
-            alert(`Error signing guestbook: ${data.error}\n${data.details || ''}`);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error signing guestbook! Please try again later.');
-    }
-}
-
-async function loadGuestbookEntries() {
-    try {
-        const response = await fetch('/api/guestbook');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const entries = await response.json();
-
-        const entriesHtml = entries.map(entry => `
-            <div class="guestbook-entry">
-                <p><strong>${entry.name}</strong> ${entry.homepage ? `<a href="${entry.homepage}">[Homepage]</a>` : ''}</p>
-                <p>${entry.message}</p>
-                <small>Posted on: ${new Date(entry.date).toLocaleDateString()}</small>
-            </div>
-        `).join('');
-
-        document.getElementById('guestbookEntries').innerHTML = entriesHtml;
-    } catch (error) {
-        console.error('Error loading entries:', error);
-        document.getElementById('guestbookEntries').innerHTML =
-            '<p style="color: #ff0000;">Error loading guestbook entries. Please try again later.</p>';
-    }
-}
-
-function showGuestbook() {
-    document.getElementById('guestbook').scrollIntoView({ behavior: 'smooth' });
-}
-
-// Load entries when page loads
-document.addEventListener('DOMContentLoaded', loadGuestbookEntries);async function submitGuestbook(event) {
-    event.preventDefault();
-
-    const formData = {
-        name: document.getElementById('guestName').value,
-        email: document.getElementById('guestEmail').value,
-        homepage: document.getElementById('guestHomepage').value,
-        message: document.getElementById('guestMessage').value
-    };
-
-    try {
-        const response = await fetch('/api/guestbook', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            alert('Thanks for signing my guestbook!');
-            loadGuestbookEntries();
-            event.target.reset();
-        } else {
-            console.error('Server error:', data);
-            alert(`Error signing guestbook: ${data.error}\n${data.details || ''}`);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error signing guestbook! Please try again later.');
-    }
-}
-
-async function loadGuestbookEntries() {
-    try {
-        const response = await fetch('/api/guestbook');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const entries = await response.json();
-
-        const entriesHtml = entries.map(entry => `
-            <div class="guestbook-entry">
-                <p><strong>${entry.name}</strong> ${entry.homepage ? `<a href="${entry.homepage}">[Homepage]</a>` : ''}</p>
-                <p>${entry.message}</p>
-                <small>Posted on: ${new Date(entry.date).toLocaleDateString()}</small>
-            </div>
-        `).join('');
-
-        document.getElementById('guestbookEntries').innerHTML = entriesHtml;
-    } catch (error) {
-        console.error('Error loading entries:', error);
-        document.getElementById('guestbookEntries').innerHTML =
-            '<p style="color: #ff0000;">Error loading guestbook entries. Please try again later.</p>';
-    }
-}
-
-function showGuestbook() {
-    document.getElementById('guestbook').scrollIntoView({ behavior: 'smooth' });
-}
-
-// Load entries when page loads
-document.addEventListener('DOMContentLoaded', loadGuestbookEntries);async function submitGuestbook(event) {
-    event.preventDefault();
-
-    const formData = {
-        name: document.getElementById('guestName').value,
-        email: document.getElementById('guestEmail').value,
-        homepage: document.getElementById('guestHomepage').value,
-        message: document.getElementById('guestMessage').value
-    };
-
-    try {
-        const response = await fetch('/api/guestbook', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            alert('Thanks for signing my guestbook!');
-            loadGuestbookEntries();
-            event.target.reset();
-        } else {
-            console.error('Server error:', data);
-            alert(`Error signing guestbook: ${data.error}\n${data.details || ''}`);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error signing guestbook! Please try again later.');
-    }
-}
-
-async function loadGuestbookEntries() {
-    try {
-        const response = await fetch('/api/guestbook');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const entries = await response.json();
-
-        const entriesHtml = entries.map(entry => `
-            <div class="guestbook-entry">
-                <p><strong>${entry.name}</strong> ${entry.homepage ? `<a href="${entry.homepage}">[Homepage]</a>` : ''}</p>
-                <p>${entry.message}</p>
-                <small>Posted on: ${new Date(entry.date).toLocaleDateString()}</small>
-            </div>
-        `).join('');
-
-        document.getElementById('guestbookEntries').innerHTML = entriesHtml;
-    } catch (error) {
-        console.error('Error loading entries:', error);
-        document.getElementById('guestbookEntries').innerHTML =
-            '<p style="color: #ff0000;">Error loading guestbook entries. Please try again later.</p>';
-    }
-}
-
-function showGuestbook() {
-    document.getElementById('guestbook').scrollIntoView({ behavior: 'smooth' });
-}
-
-// Load entries when page loads
-document.addEventListener('DOMContentLoaded', loadGuestbookEntries);async function submitGuestbook(event) {
-    event.preventDefault();
-
-    const formData = {
-        name: document.getElementById('guestName').value,
-        email: document.getElementById('guestEmail').value,
-        homepage: document.getElementById('guestHomepage').value,
-        message: document.getElementById('guestMessage').value
-    };
-
-    try {
-        const response = await fetch('/api/guestbook', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            alert('Thanks for signing my guestbook!');
-            loadGuestbookEntries();
-            event.target.reset();
-        } else {
-            console.error('Server error:', data);
-            alert(`Error signing guestbook: ${data.error}\n${data.details || ''}`);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error signing guestbook! Please try again later.');
-    }
-}
-
-async function loadGuestbookEntries() {
-    try {
-        const response = await fetch('/api/guestbook');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const entries = await response.json();
-
-        const entriesHtml = entries.map(entry => `
-            <div class="guestbook-entry">
-                <p><strong>${entry.name}</strong> ${entry.homepage ? `<a href="${entry.homepage}">[Homepage]</a>` : ''}</p>
-                <p>${entry.message}</p>
-                <small>Posted on: ${new Date(entry.date).toLocaleDateString()}</small>
-            </div>
-        `).join('');
-
-        document.getElementById('guestbookEntries').innerHTML = entriesHtml;
-    } catch (error) {
-        console.error('Error loading entries:', error);
-        document.getElementById('guestbookEntries').innerHTML =
-            '<p style="color: #ff0000;">Error loading guestbook entries. Please try again later.</p>';
-    }
-}
-
-function showGuestbook() {
-    document.getElementById('guestbook').scrollIntoView({ behavior: 'smooth' });
-}
-
-// Load entries when page loads
-document.addEventListener('DOMContentLoaded', loadGuestbookEntries);async function submitGuestbook(event) {
-    event.preventDefault();
-
-    const formData = {
-        name: document.getElementById('guestName').value,
-        email: document.getElementById('guestEmail').value,
-        homepage: document.getElementById('guestHomepage').value,
-        message: document.getElementById('guestMessage').value
-    };
-
-    try {
-        const response = await fetch('/api/guestbook', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            alert('Thanks for signing my guestbook!');
-            loadGuestbookEntries();
-            event.target.reset();
-        } else {
-            console.error('Server error:', data);
-            alert(`Error signing guestbook: ${data.error}\n${data.details || ''}`);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error signing guestbook! Please try again later.');
-    }
-}
-
-async function loadGuestbookEntries() {
-    try {
-        const response = await fetch('/api/guestbook');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const entries = await response.json();
-
-        const entriesHtml = entries.map(entry => `
-            <div class="guestbook-entry">
-                <p><strong>${entry.name}</strong> ${entry.homepage ? `<a href="${entry.homepage}">[Homepage]</a>` : ''}</p>
-                <p>${entry.message}</p>
-                <small>Posted on: ${new Date(entry.date).toLocaleDateString()}</small>
-            </div>
-        `).join('');
-
-        document.getElementById('guestbookEntries').innerHTML = entriesHtml;
-    } catch (error) {
-        console.error('Error loading entries:', error);
-        document.getElementById('guestbookEntries').innerHTML =
-            '<p style="color: #ff0000;">Error loading guestbook entries. Please try again later.</p>';
-    }
-}
-
-function showGuestbook() {
-    document.getElementById('guestbook').scrollIntoView({ behavior: 'smooth' });
-}
-
-// Load entries when page loads
-document.addEventListener('DOMContentLoaded', loadGuestbookEntries);async function submitGuestbook(event) {
-    event.preventDefault();
-
-    const formData = {
-        name: document.getElementById('guestName').value,
-        email: document.getElementById('guestEmail').value,
-        homepage: document.getElementById('guestHomepage').value,
-        message: document.getElementById('guestMessage').value
-    };
-
-    try {
-        const response = await fetch('/api/guestbook', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            alert('Thanks for signing my guestbook!');
-            loadGuestbookEntries();
-            event.target.reset();
-        } else {
-            console.error('Server error:', data);
-            alert(`Error signing guestbook: ${data.error}\n${data.details || ''}`);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error signing guestbook! Please try again later.');
-    }
-}
-
-async function loadGuestbookEntries() {
-    try {
-        const response = await fetch('/api/guestbook');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const entries = await response.json();
-
-        const entriesHtml = entries.map(entry => `
-            <div class="guestbook-entry">
-                <p><strong>${entry.name}</strong> ${entry.homepage ? `<a href="${entry.homepage}">[Homepage]</a>` : ''}</p>
-                <p>${entry.message}</p>
-                <small>Posted on: ${new Date(entry.date).toLocaleDateString()}</small>
-            </div>
-        `).join('');
-
-        document.getElementById('guestbookEntries').innerHTML = entriesHtml;
-    } catch (error) {
-        console.error('Error loading entries:', error);
-        document.getElementById('guestbookEntries').innerHTML =
-            '<p style="color: #ff0000;">Error loading guestbook entries. Please try again later.</p>';
-    }
-}
-
-function showGuestbook() {
-    document.getElementById('guestbook').scrollIntoView({ behavior: 'smooth' });
-}
+document.addEventListener('DOMContentLoaded', loadGuestbookEntries);
 
 document.addEventListener('DOMContentLoaded', () => {
     // Removed ■ and using only star-like shapes
