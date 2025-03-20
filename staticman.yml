@@ -1,0 +1,18 @@
+# Staticman configuration file
+guestbook:
+  allowedFields: ["name", "email", "homepage", "message"]
+  branch: "main"  # Change to your main branch name (might be "master" for older repos)
+  commitMessage: "New guestbook entry from {fields.name}"
+  filename: "entry-{@timestamp}"
+  format: "yaml"
+  moderation: true
+  name: "Your Retro Website"
+  path: "_data/guestbook"
+  requiredFields: ["name", "message"]
+  transforms:
+    email: md5  # For Gravatar support
+  generatedFields:
+    date:
+      type: date
+      options:
+        format: "timestamp-seconds"
