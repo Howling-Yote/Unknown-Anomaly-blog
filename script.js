@@ -1,4 +1,4 @@
-﻿async function updateVisitorCount() {
+async function updateVisitorCount() {
     try {
         const response = await fetch('/api/visitor-count');
         if (!response.ok) {
