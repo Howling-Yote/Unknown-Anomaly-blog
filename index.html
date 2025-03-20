@@ -39,7 +39,7 @@
 <body>
     <!-- Add this right after the opening <body> tag -->
     <audio id="backgroundMusic" loop>
-        <source src="/assets/audio/Dp1.mp3" type="audio/mpeg">
+        <source src="/assets/audio/dp1.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
 
@@ -153,8 +153,9 @@
                     <input type="url" name="fields[homepage]" placeholder="Your Homepage URL">
                     <textarea name="fields[message]" placeholder="Your Message" rows="4" required></textarea>
                     
-                    <!-- This is important - redirect back to your site after submission -->
-                    <input type="hidden" name="options[redirect]" value="https://www.unknown-anomaly.com/thanks.html">
+                    <!-- Redirect options -->
+                    <input type="hidden" name="options[redirect]" value="https://www.unknown-anomaly.com/">
+                    <input type="hidden" name="options[slug]" value="guestbook">
                     
                     <button type="submit">Sign Guestbook!</button>
                     <div class="retro-note" style="margin-top: 10px; border: 1px dashed #00ff00; padding: 5px; color: #ffff00;">
