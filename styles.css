@@ -1,6 +1,6 @@
-﻿ body {
+ body {
     background-image: url('https://gifdb.com/images/thumbnail/pixelated-star-background-e09dbw6zvuyp420b.gif');
-    font-family: "Comic Sans MS", cursive, sans-serif;
+    font-family: "Comic Sans MS", monospace;
     margin: 0;
     padding: 20px;
     color: #fff;
@@ -40,14 +40,13 @@
 
 
 .counter-text {
-    font-family: "Courier New", Courier, monospace;
+    font-family: "Comic Sans MS", monospace;
     background: #000;
     color: #00ff00;
     padding: 5px 10px;
     border: 2px solid #00ff00;
     display: inline-block;
     animation: blink 1s infinite;
-    
 }
 @keyframes rainbow {
     0% {
@@ -184,12 +183,12 @@
     transition: all 0.3s ease;
 }
 
-.hacker-item p {
-    color: #00ff00;
-    margin-top: 5px;
-    font-family: "Courier New", monospace;
-    text-shadow: 0 0 5px #00ff00;
-}
+    .hacker-item p {
+        color: #00ff00;
+        margin-top: 5px;
+        font-family: "Comic Sans MS", monospace;
+        text-shadow: 0 0 5px #00ff00;
+    }
 
 .terminal-window {
     background: #000;
@@ -197,7 +196,7 @@
     margin: 20px auto;
     padding: 10px;
     max-width: 600px;
-    font-family: 'Courier New', monospace;
+    font-family: 'Comic Sans MS', monospace;
 }
 
 .terminal-header {
@@ -397,7 +396,7 @@
     .hacker-item p {
         color: #00ff00;
         margin-top: 5px;
-        font-family: "Courier New", monospace;
+        font-family: "Comic Sans MS", monospace;
         text-shadow: 0 0 5px #00ff00;
     }
 
@@ -461,7 +460,7 @@ body {
     border: 2px solid #ff00ff;
     text-align: center;
     color: #00ff00;
-    font-family: "Courier New", monospace;
+    font-family: "Comic Sans MS", monospace;
     animation: blink 2s infinite;
 }
 
@@ -478,7 +477,7 @@ body {
     border: 2px solid #00ff00;
     padding: 3px 10px;
     cursor: url('/assets/cursors/w98hand.cur'), pointer;
-    font-family: "Courier New", monospace;
+    font-family: "Comic Sans MS", monospace;
     font-weight: bold;
     margin-left: 10px;
 }
