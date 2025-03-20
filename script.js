@@ -104,39 +104,59 @@ function resetGuestbookForm() {
 
 async function loadGuestbookEntries() {
     try {
-        // Update with the same values as in submitGuestbook
+        // Update with your repo details
         const username = 'Howling-Yote';
         const repo = 'Howling-Yote.github.io';
         
-        // Fetch the JSON data file that GitHub Pages will generate from your _data folder
-        const response = await fetch(`https://raw.githubusercontent.com/${username}/${repo}/main/_data/guestbook.json`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // Try to load a processed JSON file if it exists
+        try {
+            const response = await fetch(`https://raw.githubusercontent.com/${username}/${repo}/main/_data/guestbook.json`);
+            
+            if (response.ok) {
+                const entries = await response.json();
+                displayEntries(entries);
+                return; // Exit if we successfully loaded JSON
+            }
+        } catch (e) {
+            console.log("No JSON file found, trying to load individual entries...");
         }
         
-        const entries = await response.json();
+        // If no JSON file, try to get a list of files in the _data/guestbook directory
+        // Note: This requires a special API or pre-generated index, which GitHub Pages doesn't support directly
         
-        const entriesHtml = Object.entries(entries).map(([id, entry]) => {
-            // Create a Y2K era date display
-            const date = new Date(entry.date * 1000);
-            date.setFullYear(1999); // Force Y2K era date
+        // As a fallback, just display a message
+        document.getElementById('guestbookEntries').innerHTML = 
+            '<p style="color: #ffff00;">Guestbook entries will appear here after approval!</p>';
             
-            return `
-            <div class="guestbook-entry">
-                <p><strong>${entry.name}</strong> ${entry.homepage ? `<a href="${entry.homepage}" target="_blank">[Homepage]</a>` : ''}</p>
-                <p>${entry.message}</p>
-                <small>Posted on: ${date.toLocaleDateString()}</small>
-            </div>
-            `;
-        }).join('');
-        
-        document.getElementById('guestbookEntries').innerHTML = entriesHtml || '<p style="color: #ffff00;">No entries yet! Be the first to sign the guestbook!</p>';
     } catch (error) {
         console.error('Error loading entries:', error);
         document.getElementById('guestbookEntries').innerHTML = 
             '<p style="color: #ff0000;">Error loading guestbook entries. Please refresh or try again later.</p>';
     }
+}
+
+function displayEntries(entries) {
+    if (!entries || Object.keys(entries).length === 0) {
+        document.getElementById('guestbookEntries').innerHTML = 
+            '<p style="color: #ffff00;">No entries yet! Be the first to sign the guestbook!</p>';
+        return;
+    }
+    
+    const entriesHtml = Object.entries(entries).map(([id, entry]) => {
+        // Create a Y2K era date display
+        const date = new Date(entry.date * 1000);
+        date.setFullYear(1999); // Force Y2K era date
+        
+        return `
+        <div class="guestbook-entry">
+            <p><strong>${entry.name}</strong> ${entry.homepage ? `<a href="${entry.homepage}" target="_blank">[Homepage]</a>` : ''}</p>
+            <p>${entry.message}</p>
+            <small>Posted on: ${date.toLocaleDateString()}</small>
+        </div>
+        `;
+    }).join('');
+    
+    document.getElementById('guestbookEntries').innerHTML = entriesHtml;
 }
 
 function showGuestbook() {
