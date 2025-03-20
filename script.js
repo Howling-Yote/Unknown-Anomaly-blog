@@ -105,11 +105,12 @@ function resetGuestbookForm() {
 async function loadGuestbookEntries() {
     try {
         // Replace with your repo details
-        const username = 'YOUR_GITHUB_USERNAME';
-        const repo = 'YOUR_REPO_NAME';
+        const username = 'Howling-Yote';
+        const repo = 'Unknown-Anomaly-blog';
+        const branch = 'main'; // or master
         
         // Fetch the JSON data file that GitHub Pages will generate from your _data folder
-        const response = await fetch(`https://raw.githubusercontent.com/${username}/${repo}/main/_data/guestbook.json`);
+        const response = await fetch(`https://raw.githubusercontent.com/${username}/${repo}/${branch}/guestbook`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
