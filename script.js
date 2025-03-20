@@ -49,7 +49,7 @@ async function submitGuestbook(event) {
         const repo = 'Howling-Yote.github.io';
         const branch = 'main'; // or master
         
-        const endpoint = `https://api.staticman.net/v3/entry/github/${Howling-Yote}/${Unknown-Anomaly-blog}/${main}/guestbook`;
+        const endpoint = `https://api.staticman.net/v3/entry/github/${username}/${repo}/${branch}/guestbook`;
         
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -104,13 +104,12 @@ function resetGuestbookForm() {
 
 async function loadGuestbookEntries() {
     try {
-        // Replace with your repo details
+        // Update with the same values as in submitGuestbook
         const username = 'Howling-Yote';
-        const repo = 'Unknown-Anomaly-blog';
-        const branch = 'main'; // or master
+        const repo = 'Howling-Yote.github.io';
         
         // Fetch the JSON data file that GitHub Pages will generate from your _data folder
-        const response = await fetch(`https://raw.githubusercontent.com/${username}/${repo}/${branch}/guestbook`);
+        const response = await fetch(`https://raw.githubusercontent.com/${username}/${repo}/main/_data/guestbook.json`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
