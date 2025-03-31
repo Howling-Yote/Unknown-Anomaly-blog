@@ -1,80 +1,32 @@
-// Visitor counter with GoatCounter integration
 async function updateVisitorCount() {
-    const counterElement = document.getElementById('visitorCount');
-    if (!counterElement) return;
-    
     try {
-        // First approach: Try to get count from the window.goatcounter object if available
-        if (window.goatcounter && typeof window.goatcounter.count === 'function') {
-            // GoatCounter is available, try to get the total count
-            const siteData = window.goatcounter.vars.path || '';
-            if (siteData && siteData.count) {
-                counterElement.textContent = siteData.count.toString().padStart(6, '0');
-                return;
-            }
+        const response = await fetch('/api/visitor-count');
+        if (!response.ok) {
+            throw new Error('Failed to fetch visitor count');
         }
-        
-        // Second approach: Try API directly (likely to fail due to CORS)
-        const goatCounterSite = 'anomalies'; // Your GoatCounter site name
-        const response = await fetch(`https://${goatCounterSite}.goatcounter.com/counter/visits/count`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            const count = data.count || 0;
-            counterElement.textContent = count.toString().padStart(6, '0');
-            return;
+
+        const data = await response.json();
+        const count = data.totalCount || 0;
+        const formattedCount = count.toString().padStart(6, '0');
+
+        const counterElement = document.getElementById('visitorCount');
+        if (counterElement) {
+            counterElement.textContent = formattedCount;
         }
     } catch (error) {
-        console.log('Error fetching GoatCounter data, falling back to local count', error);
-    }
-    
-    // Fallback to localStorage approach if API fails
-    let storedCount = parseInt(localStorage.getItem('visitorCount') || '15789', 10);
-    
-    // Add a small random increment to make it seem more dynamic (0-3)
-    const randomIncrement = Math.floor(Math.random() * 4);
-    storedCount += randomIncrement;
-    
-    counterElement.textContent = storedCount.toString().padStart(6, '0');
-    
-    // Increment the count and save back to localStorage
-    storedCount++;
-    localStorage.setItem('visitorCount', storedCount.toString());
-}
-
-// Function to count page views more accurately
-function countPageView() {
-    // Check if we've counted this page view already
-    const pageViewCounted = sessionStorage.getItem('pageViewCounted');
-    
-    if (!pageViewCounted) {
-        // Mark that we've counted this page view
-        sessionStorage.setItem('pageViewCounted', 'true');
-        
-        // Increment the localStorage counter by a random amount to simulate real traffic
-        const storedCount = parseInt(localStorage.getItem('visitorCount') || '15789', 10);
-        const increment = Math.floor(Math.random() * 3) + 1; // 1-3 random increment
-        localStorage.setItem('visitorCount', (storedCount + increment).toString());
+        console.error('Error updating visitor count:', error);
+        document.getElementById('visitorCount').textContent = '000000';
     }
 }
 
 // Update counter when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    // Count this page view
-    countPageView();
-    
-    // Update the visitor counter initially
     updateVisitorCount();
+
+    // Update counter every 30 seconds
+    setInterval(updateVisitorCount, 30000);
     
-    // Refresh the counter every minute to keep it current
-    setInterval(updateVisitorCount, 60000);
-    
-    // Pixel shapes for mouse trail effect
+    // Removed ■ and using only star-like shapes
     const pixelShapes = [
         '★',
         '✦',
@@ -107,74 +59,58 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Music player functionality - improved to ensure autoplay works
+    // Music player functionality - fixed to work properly
     const audio = document.getElementById('backgroundMusic');
     const toggleButton = document.getElementById('toggleMusic');
 
-    // Function to attempt playing music
-    function attemptPlayMusic() {
-        const playPromise = audio.play();
-        
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-                // Audio is playing
-                toggleButton.textContent = "▐▐ PAUSE";
-                console.log("Music is playing!");
-            }).catch(error => {
-                // Auto-play was prevented
-                console.log("Auto-play was prevented: ", error);
-                toggleButton.textContent = "▶ PLAY";
-            });
-        }
+    // Try to play music automatically
+    const playPromise = audio.play();
+
+    // Modern browsers require user interaction before playing audio
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            // Auto-play was prevented
+            console.log("Auto-play was prevented. Please click the play button.");
+            toggleButton.textContent = "▶ PLAY";
+        });
     }
 
-    // Try to play music initially
-    attemptPlayMusic();
-
-    // Toggle music play/pause on button click
-    toggleButton.addEventListener('click', function(e) {
+    // Toggle music play/pause
+    toggleButton.addEventListener('click', function (e) {
         e.stopPropagation(); // Prevent document click handler from firing
         
         if (audio.paused) {
-            audio.play().then(() => {
-                toggleButton.textContent = "▐▐ PAUSE";
-            }).catch(error => {
-                console.error("Audio playback failed:", error);
-            });
+            audio.play();
+            toggleButton.textContent = "▐▐ PAUSE";
         } else {
             audio.pause();
             toggleButton.textContent = "▶ PLAY";
         }
     });
 
-    // Old-school alert to notify user about music after a brief delay
-    setTimeout(function() {
+    // Old-school alert to notify user about music
+    setTimeout(function () {
         if (audio.paused) {
-            alert("⚠️ Click PLAY for the full Y2K experience! ⚠️");
+            alert("⚠️ Click PLAY! ⚠️");
         }
     }, 3000);
     
-    // Play music on ANY user interaction (click, key press, touch)
-    function onUserInteraction() {
-        if (audio.paused) {
-            attemptPlayMusic();
-            // Remove event listeners after first interaction
-            document.removeEventListener('click', onUserInteraction);
-            document.removeEventListener('keydown', onUserInteraction);
-            document.removeEventListener('touchstart', onUserInteraction);
+    // Modified to only auto-play on first click, not every click
+    let firstClick = true;
+    document.addEventListener('click', function () {
+        if (audio.paused && firstClick) {
+            audio.play().catch(error => {
+                console.error("Audio playback failed:", error);
+            });
+            firstClick = false;
+            toggleButton.textContent = "▐▐ PAUSE";
         }
-    }
-    
-    // Add event listeners for user interaction
-    document.addEventListener('click', onUserInteraction);
-    document.addEventListener('keydown', onUserInteraction);
-    document.addEventListener('touchstart', onUserInteraction);
+    });
 });
 
 // Add this to update counter when user returns to the page
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-        // Refresh counter from GoatCounter if possible when user returns to page
         updateVisitorCount();
     }
 });
