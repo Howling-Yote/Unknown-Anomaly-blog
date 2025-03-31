@@ -78,21 +78,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Music player functionality - fixed to work properly
+    // FIXED MUSIC PLAYER FUNCTIONALITY
     const audio = document.getElementById('backgroundMusic');
     const toggleButton = document.getElementById('toggleMusic');
 
+    // Set button to show PAUSE initially (like it was before)
+    toggleButton.textContent = "▐▐ PAUSE";
+    
     // Try to play music automatically
-    const playPromise = audio.play();
-
-    // Modern browsers require user interaction before playing audio
-    if (playPromise !== undefined) {
-        playPromise.catch(error => {
-            // Auto-play was prevented
-            console.log("Auto-play was prevented. Please click the play button.");
-            toggleButton.textContent = "▶ PLAY";
-        });
-    }
+    setTimeout(() => {
+        const playPromise = audio.play();
+        
+        // Modern browsers require user interaction before playing audio
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                // Auto-play was prevented
+                console.log("Auto-play was prevented. Please click the play button.");
+                toggleButton.textContent = "▶ PLAY";
+            });
+        }
+    }, 500); // Short delay to ensure audio element is fully loaded
 
     // Toggle music play/pause
     toggleButton.addEventListener('click', function (e) {
@@ -114,15 +119,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 3000);
     
-    // Modified to only auto-play on first click, not every click
+    // IMPORTANT: Make sure first click works reliably
     let firstClick = true;
+    
     document.addEventListener('click', function () {
         if (audio.paused && firstClick) {
-            audio.play().catch(error => {
+            audio.play().then(() => {
+                toggleButton.textContent = "▐▐ PAUSE";
+            }).catch(error => {
                 console.error("Audio playback failed:", error);
             });
             firstClick = false;
-            toggleButton.textContent = "▐▐ PAUSE";
         }
     });
 });
