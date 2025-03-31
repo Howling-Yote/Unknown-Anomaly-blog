@@ -1,40 +1,21 @@
 async function updateVisitorCount() {
     try {
-        // Get the stored count from localStorage
-        let count = parseInt(localStorage.getItem('siteVisits') || '0');
-        
-        // Check if this is a new visit (using a date-based key)
-        const today = new Date().toDateString();
-        const lastVisit = localStorage.getItem('lastVisitDate');
-        
-        if (lastVisit !== today) {
-            // This is a new daily visit, increment the counter
-            count++;
-            localStorage.setItem('siteVisits', count.toString());
-            localStorage.setItem('lastVisitDate', today);
-            
-            // If Google Analytics is available, send an event
-            if (typeof gtag === 'function') {
-                gtag('event', 'page_view', {
-                    'event_category': 'engagement',
-                    'event_label': 'daily_visit'
-                });
-            }
+        const response = await fetch('/api/visitor-count');
+        if (!response.ok) {
+            throw new Error('Failed to fetch visitor count');
         }
-        
-        // Format and display the count
+
+        const data = await response.json();
+        const count = data.totalCount || 0;
         const formattedCount = count.toString().padStart(6, '0');
+
         const counterElement = document.getElementById('visitorCount');
         if (counterElement) {
             counterElement.textContent = formattedCount;
         }
     } catch (error) {
         console.error('Error updating visitor count:', error);
-        // Default to showing zeros if there's an error
-        const counterElement = document.getElementById('visitorCount');
-        if (counterElement) {
-            counterElement.textContent = '000000';
-        }
+        document.getElementById('visitorCount').textContent = '000000';
     }
 }
 
