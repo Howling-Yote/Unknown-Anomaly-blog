@@ -190,7 +190,21 @@
     </div>
     <script src="/script.js"></script>
     
-    <!-- GoatCounter analytics -->
+    <!-- GoatCounter analytics with callback -->
+    <script>
+        // This will be called after GoatCounter loads
+        window.goatcounter = {
+            no_onload: true, // Don't count initial load until we're ready
+            callback: function() {
+                // Count the visit
+                window.goatcounter.count();
+                // Update our counter display
+                if (typeof updateVisitorCount === 'function') {
+                    updateVisitorCount();
+                }
+            }
+        };
+    </script>
     <script data-goatcounter="anomalies.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
 </body>
