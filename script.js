@@ -40,75 +40,12 @@ async function updateVisitorCount() {
 
 // Update counter when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    // Run visitor counter update
     updateVisitorCount();
 
     // Update counter every 30 seconds
     setInterval(updateVisitorCount, 30000);
     
-    // Set up audio player immediately
-    setupAudioPlayer();
-    
-    // Set up sparkle effect
-    setupSparkleEffect();
-});
-
-// Separated audio player setup for clarity
-function setupAudioPlayer() {
-    const audio = document.getElementById('backgroundMusic');
-    const toggleButton = document.getElementById('toggleMusic');
-    
-    // Only try to play if the audio element exists
-    if (audio) {
-        // Try to play music automatically
-        const playPromise = audio.play();
-
-        // Modern browsers require user interaction before playing audio
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                // Auto-play was prevented
-                console.log("Auto-play was prevented. Please click the play button.");
-                toggleButton.textContent = "▶ PLAY";
-            });
-        }
-
-        // Toggle music play/pause
-        toggleButton.addEventListener('click', function (e) {
-            e.stopPropagation(); // Prevent document click handler from firing
-            
-            if (audio.paused) {
-                audio.play();
-                toggleButton.textContent = "▐▐ PAUSE";
-            } else {
-                audio.pause();
-                toggleButton.textContent = "▶ PLAY";
-            }
-        });
-
-        // Old-school alert to notify user about music
-        setTimeout(function () {
-            if (audio.paused) {
-                alert("⚠️ Click PLAY! ⚠️");
-            }
-        }, 3000);
-        
-        // Modified to only auto-play on first click, not every click
-        let firstClick = true;
-        document.addEventListener('click', function () {
-            if (audio.paused && firstClick) {
-                audio.play().catch(error => {
-                    console.error("Audio playback failed:", error);
-                });
-                firstClick = false;
-                toggleButton.textContent = "▐▐ PAUSE";
-            }
-        });
-    }
-}
-
-// Separated sparkle effect setup for clarity
-function setupSparkleEffect() {
-    // Pixel shapes for sparkles
+    // Removed ■ and using only star-like shapes
     const pixelShapes = [
         '★',
         '✦',
@@ -140,7 +77,55 @@ function setupSparkleEffect() {
             sparkle.remove();
         });
     }
-}
+    
+    // Music player functionality - fixed to work properly
+    const audio = document.getElementById('backgroundMusic');
+    const toggleButton = document.getElementById('toggleMusic');
+
+    // Try to play music automatically
+    const playPromise = audio.play();
+
+    // Modern browsers require user interaction before playing audio
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            // Auto-play was prevented
+            console.log("Auto-play was prevented. Please click the play button.");
+            toggleButton.textContent = "▶ PLAY";
+        });
+    }
+
+    // Toggle music play/pause
+    toggleButton.addEventListener('click', function (e) {
+        e.stopPropagation(); // Prevent document click handler from firing
+        
+        if (audio.paused) {
+            audio.play();
+            toggleButton.textContent = "▐▐ PAUSE";
+        } else {
+            audio.pause();
+            toggleButton.textContent = "▶ PLAY";
+        }
+    });
+
+    // Old-school alert to notify user about music
+    setTimeout(function () {
+        if (audio.paused) {
+            alert("⚠️ Click PLAY! ⚠️");
+        }
+    }, 3000);
+    
+    // Modified to only auto-play on first click, not every click
+    let firstClick = true;
+    document.addEventListener('click', function () {
+        if (audio.paused && firstClick) {
+            audio.play().catch(error => {
+                console.error("Audio playback failed:", error);
+            });
+            firstClick = false;
+            toggleButton.textContent = "▐▐ PAUSE";
+        }
+    });
+});
 
 // Add this to update counter when user returns to the page
 document.addEventListener('visibilitychange', () => {
