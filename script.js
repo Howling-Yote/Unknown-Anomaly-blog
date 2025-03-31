@@ -1,12 +1,16 @@
 async function updateVisitorCount() {
     try {
-        const response = await fetch('/api/visitor-count');
+        // Using CountAPI - a free counter API that works with static sites
+        // Replace 'unknown-anomaly' with your preferred namespace
+        // Replace 'visits' with your preferred key name
+        const response = await fetch('https://api.countapi.xyz/hit/unknown-anomaly/visits');
+        
         if (!response.ok) {
             throw new Error('Failed to fetch visitor count');
         }
 
         const data = await response.json();
-        const count = data.totalCount || 0;
+        const count = data.value || 0;
         const formattedCount = count.toString().padStart(6, '0');
 
         const counterElement = document.getElementById('visitorCount');
@@ -15,7 +19,11 @@ async function updateVisitorCount() {
         }
     } catch (error) {
         console.error('Error updating visitor count:', error);
-        document.getElementById('visitorCount').textContent = '000000';
+        // Default to showing zeros if there's an error
+        const counterElement = document.getElementById('visitorCount');
+        if (counterElement) {
+            counterElement.textContent = '000000';
+        }
     }
 }
 
