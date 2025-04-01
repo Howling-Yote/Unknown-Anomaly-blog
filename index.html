@@ -147,11 +147,14 @@
                 📖 Sign my guestbook! 📖
             </div>
             <div class="guestbook-form">
-    <form id="guestbookForm" onsubmit="submitGuestbook(event)">
-        <input type="text" name="name" id="guestName" placeholder="Your Name" required>
-        <input type="email" name="email" id="guestEmail" placeholder="Your Email" required>
-        <input type="url" name="homepage" id="guestHomepage" placeholder="Your Homepage URL">
-        <textarea name="message" id="guestMessage" placeholder="Your Message" rows="4" required></textarea>
+    <form action="https://staticman-five.vercel.app//v2/entry/Howling-Yote/Unknown-Anomaly-blog.github.io/main/_data/guestbook" method="POST">
+        <input type="text" name="fields[name]" placeholder="Your Name" required>
+        <input type="email" name="fields[email]" placeholder="Your Email" required>
+        <input type="url" name="fields[homepage]" placeholder="Your Homepage URL">
+        <textarea name="fields[message]" placeholder="Your Message" rows="4" required></textarea>
+        
+        <!-- Redirect to your custom domain after submission -->
+        <input type="hidden" name="options[redirect]" value="https://www.unknown-anomaly.com/thanks.html">
         
         <button type="submit">Sign Guestbook!</button>
         <div class="retro-note" style="margin-top: 10px; border: 1px dashed #00ff00; padding: 5px; color: #ffff00;">
@@ -186,9 +189,5 @@
         </footer>
     </div>
     <script src="/script.js"></script>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
 </body>
 </html>
