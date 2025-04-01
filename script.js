@@ -25,87 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update counter every 30 seconds
     setInterval(updateVisitorCount, 30000);
-    
-    // Removed ■ and using only star-like shapes
-    const pixelShapes = [
-        '★',
-        '✦',
-        '⋆',
-        '*'
-    ];
-
-    document.addEventListener('mousemove', (e) => {
-        if (Math.random() < 0.2) {
-            createPixelSparkle(e.clientX, e.clientY);
-        }
-    });
-
-    function createPixelSparkle(x, y) {
-        const sparkle = document.createElement('div');
-        sparkle.className = 'sparkle';
-
-        const offsetX = (Math.random() - 0.5) * 10;
-        const offsetY = (Math.random() - 0.5) * 10;
-
-        sparkle.style.left = `${x + offsetX}px`;
-        sparkle.style.top = `${y + offsetY}px`;
-
-        sparkle.textContent = pixelShapes[Math.floor(Math.random() * pixelShapes.length)];
-
-        document.body.appendChild(sparkle);
-
-        sparkle.addEventListener('animationend', () => {
-            sparkle.remove();
-        });
-    }
-    
-    // Music player functionality - fixed to work properly
-    const audio = document.getElementById('backgroundMusic');
-    const toggleButton = document.getElementById('toggleMusic');
-
-    // Try to play music automatically
-    const playPromise = audio.play();
-
-    // Modern browsers require user interaction before playing audio
-    if (playPromise !== undefined) {
-        playPromise.catch(error => {
-            // Auto-play was prevented
-            console.log("Auto-play was prevented. Please click the play button.");
-            toggleButton.textContent = "▶ PLAY";
-        });
-    }
-
-    // Toggle music play/pause
-    toggleButton.addEventListener('click', function (e) {
-        e.stopPropagation(); // Prevent document click handler from firing
-        
-        if (audio.paused) {
-            audio.play();
-            toggleButton.textContent = "▐▐ PAUSE";
-        } else {
-            audio.pause();
-            toggleButton.textContent = "▶ PLAY";
-        }
-    });
-
-    // Old-school alert to notify user about music
-    setTimeout(function () {
-        if (audio.paused) {
-            alert("⚠️ Click PLAY! ⚠️");
-        }
-    }, 3000);
-    
-    // Modified to only auto-play on first click, not every click
-    let firstClick = true;
-    document.addEventListener('click', function () {
-        if (audio.paused && firstClick) {
-            audio.play().catch(error => {
-                console.error("Audio playback failed:", error);
-            });
-            firstClick = false;
-            toggleButton.textContent = "▐▐ PAUSE";
-        }
-    });
 });
 
 // Add this to update counter when user returns to the page
@@ -246,3 +165,81 @@ function showGuestbook() {
 
 // Load entries when page loads
 document.addEventListener('DOMContentLoaded', loadGuestbookEntries);
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Removed ■ and using only star-like shapes
+    const pixelShapes = [
+        '★',
+        '✦',
+        '⋆',
+        '*'
+    ];
+
+    document.addEventListener('mousemove', (e) => {
+        if (Math.random() < 0.2) {
+            createPixelSparkle(e.clientX, e.clientY);
+        }
+    });
+
+    function createPixelSparkle(x, y) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+
+        const offsetX = (Math.random() - 0.5) * 10;
+        const offsetY = (Math.random() - 0.5) * 10;
+
+        sparkle.style.left = `${x + offsetX}px`;
+        sparkle.style.top = `${y + offsetY}px`;
+
+        sparkle.textContent = pixelShapes[Math.floor(Math.random() * pixelShapes.length)];
+
+        document.body.appendChild(sparkle);
+
+        sparkle.addEventListener('animationend', () => {
+            sparkle.remove();
+        });
+    }
+    // Music player functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const audio = document.getElementById('backgroundMusic');
+        const toggleButton = document.getElementById('toggleMusic');
+
+        // Try to play music automatically
+        const playPromise = audio.play();
+
+        // Modern browsers require user interaction before playing audio
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                // Auto-play was prevented
+                console.log("Auto-play was prevented. Please click the play button.");
+                toggleButton.textContent = "▶ PLAY";
+            });
+        }
+
+        // Toggle music play/pause
+        toggleButton.addEventListener('click', function () {
+            if (audio.paused) {
+                audio.play();
+                toggleButton.textContent = "▐▐ PAUSE";
+            } else {
+                audio.pause();
+                toggleButton.textContent = "▶ PLAY";
+            }
+        });
+
+        // Old-school alert to notify user about music
+        setTimeout(function () {
+            if (audio.paused) {
+                alert("⚠️ Click PLAY! ⚠️");
+            }
+        }, 3000);
+    });
+    document.addEventListener('click', function () {
+        const audio = document.getElementById('backgroundMusic');
+        if (audio.paused) {
+            audio.play().catch(error => {
+                console.error("Audio playback failed:", error);
+            });
+        }
+    });
+});
