@@ -1,3 +1,17 @@
+// Firebase configuration - REPLACE WITH YOUR OWN CONFIG VALUES
+const firebaseConfig = {
+  apiKey: "AIzaSyDvWytGWtgWvCiXIlIC4KiffGyb3PMFVKM",
+  authDomain: "unknown-anomaly.firebaseapp.com",
+  projectId: "unknown-anomaly",
+  storageBucket: "unknown-anomaly.appspot.com",
+  messagingSenderId: "148200392157",
+  appId: "1:148200392157:web:7b8bd885e562f5560aa234"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 async function updateVisitorCount() {
     try {
         const response = await fetch('/api/visitor-count');
@@ -119,42 +133,47 @@ async function submitGuestbook(event) {
     event.preventDefault();
     
     const form = event.target;
-    const formData = new FormData(form);
+    const formContainer = document.querySelector('.guestbook-form');
     
     // Show submission in progress message
-    form.innerHTML = '<div style="color: #00ff00; text-align: center;">Sending your entry... Please wait!</div>';
+    formContainer.innerHTML = '<div style="color: #00ff00; text-align: center;">Sending your entry... Please wait!</div>';
     
     try {
-        // Replace with your repo details
-        const username = 'Howling-Yote';
-        const repo = 'Howling-Yote.github.io';
-        const branch = 'main'; // or master
+        // Get form data
+        const name = document.getElementById('guestName').value;
+        const email = document.getElementById('guestEmail').value;
+        const homepage = document.getElementById('guestHomepage').value;
+        const message = document.getElementById('guestMessage').value;
         
-        const endpoint = `https://api.staticman.net/v3/entry/github/${username}/${repo}/${branch}/guestbook`;
+        // Create timestamp (forced to 1999 for Y2K aesthetic)
+        const now = new Date();
+        const y2kDate = new Date(1999, now.getMonth(), now.getDate());
         
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            body: formData
+        // Add to Firebase
+        await db.collection('guestbook').add({
+            name: name,
+            email: email,
+            homepage: homepage,
+            message: message,
+            timestamp: firebase.firestore.Timestamp.fromDate(y2kDate),
+            approved: false, // Entries start as unapproved
+            created: firebase.firestore.FieldValue.serverTimestamp() // Actual timestamp for sorting
         });
         
-        if (response.ok) {
-            // Success message
-            form.innerHTML = `
-                <div style="color: #00ff00; text-align: center; border: 2px dashed #ff00ff; padding: 10px;">
-                    <h3>✧･ﾟ: *✧･ﾟ:* THANKS! *:･ﾟ✧*:･ﾟ✧</h3>
-                    <p>Your guestbook entry has been submitted!</p>
-                    <p>It will appear after moderation.</p>
-                    <button onclick="resetGuestbookForm()" style="background: #ff00ff; color: white; border: 2px solid #00ff00; margin-top: 10px; cursor: pointer;">
-                        Submit Another Entry
-                    </button>
-                </div>
-            `;
-        } else {
-            throw new Error('Submission failed');
-        }
+        // Success message
+        formContainer.innerHTML = `
+            <div style="color: #00ff00; text-align: center; border: 2px dashed #ff00ff; padding: 10px;">
+                <h3>✧･ﾟ: *✧･ﾟ:* THANKS! *:･ﾟ✧*:･ﾟ✧</h3>
+                <p>Your guestbook entry has been submitted!</p>
+                <p>It will appear after moderation.</p>
+                <button onclick="resetGuestbookForm()" style="background: #ff00ff; color: white; border: 2px solid #00ff00; margin-top: 10px; cursor: pointer;">
+                    Submit Another Entry
+                </button>
+            </div>
+        `;
     } catch (error) {
         console.error('Error:', error);
-        form.innerHTML = `
+        formContainer.innerHTML = `
             <div style="color: #ff0000; text-align: center; border: 2px dashed #ff00ff; padding: 10px;">
                 <h3>Uh oh! Something went wrong!</h3>
                 <p>Please try again later.</p>
@@ -168,13 +187,13 @@ async function submitGuestbook(event) {
 
 function resetGuestbookForm() {
     document.querySelector('.guestbook-form').innerHTML = `
-        <form onsubmit="submitGuestbook(event)">
-            <input type="text" name="fields[name]" placeholder="Your Name" required>
-            <input type="email" name="fields[email]" placeholder="Your Email" required>
-            <input type="url" name="fields[homepage]" placeholder="Your Homepage URL">
-            <textarea name="fields[message]" placeholder="Your Message" rows="4" required></textarea>
+        <form id="guestbookForm" onsubmit="submitGuestbook(event)">
+            <input type="text" name="name" id="guestName" placeholder="Your Name" required>
+            <input type="email" name="email" id="guestEmail" placeholder="Your Email" required>
+            <input type="url" name="homepage" id="guestHomepage" placeholder="Your Homepage URL">
+            <textarea name="message" id="guestMessage" placeholder="Your Message" rows="4" required></textarea>
             <button type="submit">Sign Guestbook!</button>
-            <div class="retro-note">
+            <div class="retro-note" style="margin-top: 10px; border: 1px dashed #00ff00; padding: 5px; color: #ffff00;">
                 <marquee scrollamount="3" direction="left" behavior="alternate">
                     ✧･ﾟ: Entries will appear after approval :･ﾟ✧
                 </marquee>
@@ -185,30 +204,37 @@ function resetGuestbookForm() {
 
 async function loadGuestbookEntries() {
     try {
-        // Update with your repo details
-        const username = 'Howling-Yote';
-        const repo = 'Howling-Yote.github.io';
+        const entriesContainer = document.getElementById('guestbookEntries');
+        entriesContainer.innerHTML = '<p style="color: #ffff00;">Loading entries...</p>';
         
-        // Try to load a processed JSON file if it exists
-        try {
-            const response = await fetch(`https://raw.githubusercontent.com/${username}/${repo}/main/_data/guestbook.json`);
-            
-            if (response.ok) {
-                const entries = await response.json();
-                displayEntries(entries);
-                return; // Exit if we successfully loaded JSON
-            }
-        } catch (e) {
-            console.log("No JSON file found, trying to load individual entries...");
+        // Query Firebase for approved entries only, ordered by created timestamp (descending)
+        const snapshot = await db.collection('guestbook')
+            .where('approved', '==', true)
+            .orderBy('created', 'desc')
+            .limit(10) // Limit to most recent 10 entries
+            .get();
+        
+        if (snapshot.empty) {
+            entriesContainer.innerHTML = 
+                '<p style="color: #ffff00;">No entries yet! Be the first to sign the guestbook!</p>';
+            return;
         }
         
-        // If no JSON file, try to get a list of files in the _data/guestbook directory
-        // Note: This requires a special API or pre-generated index, which GitHub Pages doesn't support directly
+        // Process entries
+        const entries = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            entries.push({
+                id: doc.id,
+                name: data.name,
+                email: data.email,
+                homepage: data.homepage,
+                message: data.message,
+                timestamp: data.timestamp
+            });
+        });
         
-        // As a fallback, just display a message
-        document.getElementById('guestbookEntries').innerHTML = 
-            '<p style="color: #ffff00;">Guestbook entries will appear here after approval!</p>';
-            
+        displayEntries(entries);
     } catch (error) {
         console.error('Error loading entries:', error);
         document.getElementById('guestbookEntries').innerHTML = 
@@ -217,16 +243,15 @@ async function loadGuestbookEntries() {
 }
 
 function displayEntries(entries) {
-    if (!entries || Object.keys(entries).length === 0) {
+    if (!entries || entries.length === 0) {
         document.getElementById('guestbookEntries').innerHTML = 
             '<p style="color: #ffff00;">No entries yet! Be the first to sign the guestbook!</p>';
         return;
     }
     
-    const entriesHtml = Object.entries(entries).map(([id, entry]) => {
-        // Create a Y2K era date display
-        const date = new Date(entry.date * 1000);
-        date.setFullYear(1999); // Force Y2K era date
+    const entriesHtml = entries.map(entry => {
+        // Create timestamp for display
+        const date = entry.timestamp?.toDate() || new Date();
         
         return `
         <div class="guestbook-entry">
