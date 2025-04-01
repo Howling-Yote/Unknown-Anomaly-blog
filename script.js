@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Music player functionality - fixed to work properly
+    // Music player functionality - fixed by moving out of nested event listener
     const audio = document.getElementById('backgroundMusic');
     const toggleButton = document.getElementById('toggleMusic');
 
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Toggle music play/pause
     toggleButton.addEventListener('click', function (e) {
-        e.stopPropagation(); // Prevent document click handler from firing
+        e.stopPropagation(); // Prevent the global click handler from firing
         
         if (audio.paused) {
             audio.play();
@@ -95,15 +95,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 3000);
     
-    // Modified to only auto-play on first click, not every click
-    let firstClick = true;
-    document.addEventListener('click', function () {
-        if (audio.paused && firstClick) {
+    // Modified to not interfere with pause button
+    document.addEventListener('click', function (e) {
+        // Don't auto-play if click was on the toggle button
+        if (e.target === toggleButton) {
+            return;
+        }
+        
+        const audio = document.getElementById('backgroundMusic');
+        if (audio.paused) {
             audio.play().catch(error => {
                 console.error("Audio playback failed:", error);
             });
-            firstClick = false;
-            toggleButton.textContent = "▐▐ PAUSE";
+            
+            // Update button text when we auto-play
+            if (toggleButton) {
+                toggleButton.textContent = "▐▐ PAUSE";
+            }
         }
     });
 });
