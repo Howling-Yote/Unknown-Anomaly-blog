@@ -233,15 +233,28 @@ function showGuestbook() {
 
 async function updateVisitorCount() {
     try {
-        const response = await fetch('/api/visitor-count');
-        if (!response.ok) {
-            throw new Error('Failed to fetch visitor count');
+        // Reference to the visitor counter in Firebase
+        const visitorCounterRef = firebase.database().ref('visitorCounter');
+        
+        // Get current count
+        const snapshot = await visitorCounterRef.once('value');
+        let count = 0;
+        
+        // If counter exists, increment it, otherwise create it
+        if (snapshot.exists()) {
+            count = snapshot.val().count + 1;
+        } else {
+            count = 1;
         }
-
-        const data = await response.json();
-        const count = data.totalCount || 0;
+        
+        // Update the counter in Firebase
+        await visitorCounterRef.set({
+            count: count,
+            lastUpdated: Date.now()
+        });
+        
+        // Format and display the count
         const formattedCount = count.toString().padStart(6, '0');
-
         const counterElement = document.getElementById('visitorCount');
         if (counterElement) {
             counterElement.textContent = formattedCount;
