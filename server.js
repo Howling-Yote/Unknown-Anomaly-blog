@@ -36,6 +36,11 @@ const connectDB = async () => {
 connectDB().then(() => {
     // Routes
     app.get('/', (req, res) => {
+        const splashPath = path.join(publicPath, "splash.html");
+        res.sendFile(splashPath);
+    });
+
+    app.get('/index.html', (req, res) => {
         const indexPath = path.join(publicPath, "index.html");
         res.sendFile(indexPath);
     });
