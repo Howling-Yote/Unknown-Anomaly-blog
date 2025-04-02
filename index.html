@@ -9,7 +9,7 @@
             margin: 0;
             padding: 0;
             background-color: #000080;
-            background-image: url('/img/bg.png');
+            background-image: url('/assets/img/bg.png');
             background-repeat: repeat;
             font-family: "Comic Sans MS", monospace;
             display: flex;
@@ -33,7 +33,7 @@
             cursor: url('/assets/cursors/w98hand.cur'), pointer;
             text-decoration: none;
             display: block;
-            margin: 20px;
+            margin-top: 30px;
         }
 
         .enter-text:hover {
@@ -119,6 +119,16 @@
                 opacity: 0;
             }
         }
+
+        /* Style for the middle GIF */
+        .middle-gif {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
     </style>
 </head>
 <body>
@@ -131,6 +141,8 @@
     <img src="/assets/img/28.gif" alt="Right decoration" class="side-gif right-gif">
     
     <div class="splash-container">
+        <!-- Add the 9.gif in the middle -->
+        <img src="/assets/img/9.gif" alt="Welcome GIF" class="middle-gif">
         <a href="#" id="enterButton" class="enter-text">ENTER</a>
     </div>
 
