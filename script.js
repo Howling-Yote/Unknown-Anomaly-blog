@@ -11,6 +11,13 @@ const firebaseConfig = {
     measurementId: "G-DQ37V7S9EC"
 };
 
+// Function to format date to Y2K style (1999)
+function formatY2KDate(timestamp) {
+    const date = new Date(timestamp);
+    date.setFullYear(1999); // Force Y2K era date
+    return date.toLocaleDateString();
+}
+
 // Initialize Firebase
 document.addEventListener('DOMContentLoaded', function() {
     try {
@@ -22,13 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Firebase initialization error:', error);
     }
     
-    // Function to format date to Y2K style (1999)
-    function formatY2KDate(timestamp) {
-        const date = new Date(timestamp);
-        date.setFullYear(1999); // Force Y2K era date
-        return date.toLocaleDateString();
-    }
-
     // Setup guestbook form submission
     const guestbookForm = document.getElementById('guestbookForm');
     
