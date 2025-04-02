@@ -125,16 +125,39 @@
     <div class="matrix-bg"></div>
     
     <!-- Left side GIF -->
-    <img src="/img/20.gif" alt="Left decoration" class="side-gif left-gif">
+    <img src="/assets/img/20.gif" alt="Left decoration" class="side-gif left-gif">
     
     <!-- Right side GIF -->
-    <img src="/img/28.gif" alt="Right decoration" class="side-gif right-gif">
+    <img src="/assets/img/28.gif" alt="Right decoration" class="side-gif right-gif">
     
     <div class="splash-container">
-        <a href="/main.html" class="enter-text">ENTER</a>
+        <a href="#" id="enterButton" class="enter-text">ENTER</a>
     </div>
 
+    <!-- Add audio element for click sound -->
+    <audio id="clickSound" preload="auto">
+        <source src="/assets/audio/mouseclick.mp3" type="audio/mpeg">
+    </audio>
+
     <script>
+        // Handle enter button click
+        document.getElementById('enterButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            const clickSound = document.getElementById('clickSound');
+            
+            // Play click sound and wait for it to finish before navigating
+            clickSound.play().then(() => {
+                // Add a small delay to let the sound play
+                setTimeout(() => {
+                    window.location.href = '/main.html';
+                }, 100);
+            }).catch(error => {
+                // If sound can't play, just navigate
+                console.error("Sound play failed:", error);
+                window.location.href = '/main.html';
+            });
+        });
+
         // Add sparkle effect on mouse movement
         document.addEventListener('mousemove', (e) => {
             if (Math.random() < 0.2) {
