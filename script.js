@@ -173,45 +173,43 @@ function loadGuestbookEntries() {
         // Show loading message
         entriesContainer.innerHTML = '<p style="color: #00ff00;">Loading guestbook entries...</p>';
         
-        // Retrieve entries ordered by timestamp (most recent first)
-        guestbookRef.orderByChild('timestamp').limitToLast(10).once('value')
-            .then(snapshot => {
-                if (!snapshot.exists()) {
-                    entriesContainer.innerHTML = '<p style="color: #ffff00;">No entries yet! Be the first to sign the guestbook!</p>';
-                    return;
-                }
-                
-                // Convert snapshot to array and reverse to show newest first
-                const entries = [];
-                snapshot.forEach(childSnapshot => {
-                    entries.push({
-                        id: childSnapshot.key,
-                        ...childSnapshot.val()
-                    });
+        // Use on('value') instead of once('value') to get real-time updates
+        guestbookRef.orderByChild('timestamp').limitToLast(10).on('value', snapshot => {
+            if (!snapshot.exists()) {
+                entriesContainer.innerHTML = '<p style="color: #ffff00;">No entries yet! Be the first to sign the guestbook!</p>';
+                return;
+            }
+            
+            // Convert snapshot to array and reverse to show newest first
+            const entries = [];
+            snapshot.forEach(childSnapshot => {
+                entries.push({
+                    id: childSnapshot.key,
+                    ...childSnapshot.val()
                 });
-                
-                // Reverse array to show newest first
-                entries.reverse();
-                
-                // Generate HTML for entries
-                const entriesHtml = entries.map(entry => {
-                    const date = formatY2KDate(entry.timestamp);
-                    
-                    return `
-                    <div class="guestbook-entry">
-                        <p><strong>${escapeHtml(entry.name)}</strong> ${entry.homepage ? `<a href="${escapeHtml(entry.homepage)}" target="_blank">[Homepage]</a>` : ''}</p>
-                        <p>${escapeHtml(entry.message)}</p>
-                        <small>Posted on: ${date}</small>
-                    </div>
-                    `;
-                }).join('');
-                
-                entriesContainer.innerHTML = entriesHtml;
-            })
-            .catch(error => {
-                console.error('Error loading entries:', error);
-                entriesContainer.innerHTML = '<p style="color: #ff0000;">Error loading guestbook entries. Please refresh or try again later.</p>';
             });
+            
+            // Reverse array to show newest first
+            entries.reverse();
+            
+            // Generate HTML for entries
+            const entriesHtml = entries.map(entry => {
+                const date = formatY2KDate(entry.timestamp);
+                
+                return `
+                <div class="guestbook-entry">
+                    <p><strong>${escapeHtml(entry.name)}</strong> ${entry.homepage ? `<a href="${escapeHtml(entry.homepage)}" target="_blank">[Homepage]</a>` : ''}</p>
+                    <p>${escapeHtml(entry.message)}</p>
+                    <small>Posted on: ${date}</small>
+                </div>
+                `;
+            }).join('');
+            
+            entriesContainer.innerHTML = entriesHtml;
+        }, error => {
+            console.error('Error loading entries:', error);
+            entriesContainer.innerHTML = '<p style="color: #ff0000;">Error loading guestbook entries. Please refresh or try again later.</p>';
+        });
     } catch (error) {
         console.error('Error accessing Firebase database:', error);
         entriesContainer.innerHTML = '<p style="color: #ff0000;">Error: Firebase database not accessible. Check console for details.</p>';
