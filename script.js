@@ -233,31 +233,53 @@ function showGuestbook() {
 
 async function updateVisitorCount() {
     try {
-        // Reference to the visitor counter in Firebase
-        const visitorCounterRef = firebase.database().ref('visitorCounter');
+        // Check if this is a unique visit using localStorage
+        const visitorId = localStorage.getItem('visitorId');
+        const lastVisitTime = localStorage.getItem('lastVisitTime');
+        const now = Date.now();
+        const oneDayInMs = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
         
-        // Get current count
-        const snapshot = await visitorCounterRef.once('value');
-        let count = 0;
+        // Create a unique ID for new visitors or if 24 hours have passed since last visit
+        const isNewVisit = !visitorId || (lastVisitTime && (now - parseInt(lastVisitTime)) > oneDayInMs);
         
-        // If counter exists, increment it, otherwise create it
-        if (snapshot.exists()) {
-            count = snapshot.val().count + 1;
-        } else {
-            count = 1;
+        if (isNewVisit) {
+            // Generate a random visitor ID and store it
+            const newVisitorId = 'visitor-' + Math.random().toString(36).substring(2, 15);
+            localStorage.setItem('visitorId', newVisitorId);
+            localStorage.setItem('lastVisitTime', now.toString());
+            
+            // Reference to the visitor counter in Firebase
+            const visitorCounterRef = firebase.database().ref('visitorCounter');
+            
+            // Get current count
+            const snapshot = await visitorCounterRef.once('value');
+            let count = 0;
+            
+            // If counter exists, increment it, otherwise create it
+            if (snapshot.exists()) {
+                count = snapshot.val().count + 1;
+            } else {
+                count = 1;
+            }
+            
+            // Update the counter in Firebase
+            await visitorCounterRef.set({
+                count: count,
+                lastUpdated: now
+            });
         }
         
-        // Update the counter in Firebase
-        await visitorCounterRef.set({
-            count: count,
-            lastUpdated: Date.now()
-        });
+        // Always display the current count, even if not incremented
+        const visitorCounterRef = firebase.database().ref('visitorCounter');
+        const snapshot = await visitorCounterRef.once('value');
         
-        // Format and display the count
-        const formattedCount = count.toString().padStart(6, '0');
-        const counterElement = document.getElementById('visitorCount');
-        if (counterElement) {
-            counterElement.textContent = formattedCount;
+        if (snapshot.exists()) {
+            const count = snapshot.val().count;
+            const formattedCount = count.toString().padStart(6, '0');
+            const counterElement = document.getElementById('visitorCount');
+            if (counterElement) {
+                counterElement.textContent = formattedCount;
+            }
         }
     } catch (error) {
         console.error('Error updating visitor count:', error);
@@ -365,11 +387,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Add this to update counter when user returns to the page
+// Update when user returns to the page, but don't increment counter unnecessarily
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
         // Check if Firebase is initialized
         if (firebase.apps && firebase.apps.length > 0) {
+            // Just update the display without incrementing the counter
+            // This will only show the current count from Firebase
             updateVisitorCount();
         } else {
             console.warn('Firebase not initialized when returning to page');
