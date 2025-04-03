@@ -267,10 +267,21 @@ async function updateVisitorCount() {
 
 // Update counter when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    updateVisitorCount();
+    // First make sure Firebase is initialized before updating visitor count
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            console.log('Firebase initialized for visitor counter');
+        }
+        // Now that Firebase is initialized, update the visitor count
+        updateVisitorCount();
 
-    // Update counter every 30 seconds
-    setInterval(updateVisitorCount, 30000);
+        // Update counter every 30 seconds
+        setInterval(updateVisitorCount, 30000);
+    } catch (error) {
+        console.error('Firebase initialization error for visitor counter:', error);
+        document.getElementById('visitorCount').textContent = '000000';
+    }
     
     // Removed ■ and using only star-like shapes
     const pixelShapes = [
@@ -357,6 +368,18 @@ document.addEventListener('DOMContentLoaded', () => {
 // Add this to update counter when user returns to the page
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-        updateVisitorCount();
+        // Check if Firebase is initialized
+        if (firebase.apps && firebase.apps.length > 0) {
+            updateVisitorCount();
+        } else {
+            console.warn('Firebase not initialized when returning to page');
+            // Try to initialize Firebase
+            try {
+                firebase.initializeApp(firebaseConfig);
+                updateVisitorCount();
+            } catch (error) {
+                console.error('Could not initialize Firebase on page return:', error);
+            }
+        }
     }
 });
