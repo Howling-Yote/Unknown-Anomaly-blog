@@ -1,4 +1,4 @@
-﻿ body {
+﻿body {
     background-image: url('/assets/img/indexbg.gif');
     font-family: "Comic Sans MS", monospace;
     margin: 0;
@@ -37,7 +37,27 @@
     
 }
 
+.nav-links {
+    background-color: #000040;
+    padding: 10px;
+    text-align: center;
+    margin: 20px 0;
+    border: 2px solid #00ff00;
+    font-size: 18px;
+}
 
+.nav-links a {
+    color: #00ff00;
+    text-decoration: none;
+    padding: 0 10px;
+    cursor: url('/assets/cursors/w98hand.cur'), pointer;
+}
+
+.nav-links a:hover {
+    color: #ffff00;
+    text-shadow: 0 0 5px #00ff00;
+    animation: glow 1s infinite alternate;
+}
 
 .counter-text {
     font-family: "Comic Sans MS", monospace;
